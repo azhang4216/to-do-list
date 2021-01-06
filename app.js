@@ -3,14 +3,21 @@ const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
 const mongoose = require("mongoose");
 const _ = require("lodash");
- 
+require("dotenv").config();
+
 const app = express();
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://localhost:27017/todolistDB", {useNewUrlParser: true, useUnifiedTopology: true });
+const mongo_user = process.env.MONGO_USER;
+const mongo_password = process.env.MONGO_PASSWORD;
+
+mongoose.connect(
+    "mongodb+srv://" + mongo_user + ":" + mongo_password + "@cluster0.f8jt9.mongodb.net/todolistDB",
+    {useNewUrlParser: true, useUnifiedTopology: true }
+);
 
 const itemSchema = new mongoose.Schema({
     name: {
@@ -35,28 +42,8 @@ const item2 = new Item({name: "Work Out"});
 const item3 = new Item({name: "Eat Breakfast"});
 
 const defaultItems = [item1, item2, item3];
-// const defaultItems = ["Wake Up", "Work Out", "Eat Breakfast"];
 
 app.get("/", (_req, res) => {
-    
-    // insert default items if database is empty
-    // Item.find({}, (e, foundItems) => {
-    //     if (e) {
-    //         console.log(e);
-    //     } else if (foundItems.length === 0) {
-    //         Item.insertMany(defaultItems, (e) => {
-    //             if (e) {
-    //                 console.log(e);
-    //             } else {
-    //                 console.log("successfully added default documents");
-    //             }
-    //         });
-
-    //         // wait for database to store data before redirecting
-    //         setTimeout(() => { res.redirect("/"); }, 200);
-    //     } 
-    // });
-    
     // insert default list if no default list; otherwise, go to home page
     List.findOne({name: "default"}, (e, defaultList) => {
         if (e) {
